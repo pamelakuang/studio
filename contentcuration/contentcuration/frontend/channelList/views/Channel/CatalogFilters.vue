@@ -61,6 +61,14 @@
           :label="$tr('formatLabel')"
         />
 
+        <!-- Sorting -->
+        <MultiSelect
+          v-model="sortOptions"
+          :items="sortingOptions"
+          :label="$tr('sortLabel')"
+          @input="selectOpt"
+        />
+
         <!-- Starred -->
         <Checkbox
           v-if="loggedIn"
@@ -178,6 +186,30 @@
       setKeywords() {
         return debounce(this.updateKeywords, 500);
       },
+      sortingOptions() {
+        var options = [
+          {
+            'text': 'Name Z to A',
+            'value': '-name',
+          },
+          {
+            'text': 'Recently modified',
+            'value': 'modified',
+          },
+          {
+            'text': 'Least recently modified',
+            'value': '-modified',
+          },
+        ];
+        return (
+          options.map(o => {
+            return {
+              text: o.text,
+              value: o.value,
+            }
+          })
+        )
+      }
     },
     watch: {
       keywords() {
@@ -191,6 +223,36 @@
       updateKeywords() {
         this.keywords = this.keywordInput;
       },
+      selectOpt: function (e) {
+        if (e.includes('modified')) {
+          this.sortingOptions.forEach((item) => {
+            if (item.value == '-modified') {
+              item.disabled = true;
+            }
+          })
+        }
+        else if (!e.includes('modified')) {
+          this.sortingOptions.forEach((item) => {
+            if (item.value == '-modified') {
+              item.disabled = false;
+            }
+          })
+        }
+        if (e.includes('-modified')) {
+          this.sortingOptions.forEach((item) => {
+            if (item.value == 'modified') {
+              item.disabled = true;
+            }
+          })
+        }
+        else if (!e.includes('-modified')) {
+          this.sortingOptions.forEach((item) => {
+            if (item.value == 'modified') {
+              item.disabled = false;
+            }
+          })
+        }
+      }
     },
     $trs: {
       searchLabel: 'Keywords',
@@ -198,6 +260,7 @@
       subtitlesLabel: 'Captions or subtitles',
       starredLabel: 'Starred',
       licenseLabel: 'Licenses',
+      sortLabel: 'Sort',
       formatLabel: 'Formats',
       includesLabel: 'Display only channels with',
       searchText: 'Search',

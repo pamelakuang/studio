@@ -106,6 +106,7 @@
 
 <script>
 
+  import orderBy from 'lodash/orderBy';
   import { mapActions, mapGetters, mapState } from 'vuex';
   import debounce from 'lodash/debounce';
   import difference from 'lodash/difference';
@@ -189,7 +190,38 @@
         return RouteNames.CATALOG_DETAILS;
       },
       channels() {
-        return this.getChannels(this.page.results);
+        const sortOpt = String(this.$route.query.sortOptions).split(",");
+        var sortFields = [];
+        var dir = [];
+        if (this.$route.query.sortOptions != undefined) {
+          for (let i = 0; i < sortOpt.length; i++) {
+            if (sortOpt[i] == "modified") {
+              sortFields.push('modified');
+              dir.push('asc');
+            }
+            if (sortOpt[i] == "-modified") {
+              sortFields.push('modified');
+              dir.push('desc');
+            }
+            if (sortOpt[i] == "-name") {
+              sortFields.push(user => user.name.toLowerCase());
+              dir.push('desc');
+            }
+          }
+          if (!sortOpt.includes("-name")) {
+            sortFields.push(user => user.name.toLowerCase());
+            dir.push('asc');
+          }
+          console.log(sortFields);
+        }
+        else {
+          sortFields.push(user => user.name.toLowerCase());
+          dir.push('asc');
+        }
+        return orderBy(
+          this.getChannels(this.page.results),
+          sortFields, dir
+        )
       },
       selectedCount() {
         return this.page.count - this.excluded.length;

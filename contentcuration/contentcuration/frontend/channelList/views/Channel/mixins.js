@@ -38,6 +38,15 @@ export const catalogFilterMixin = {
         this.setQueryParam('kinds', value);
       },
     },
+    sortOptions: {
+      get() {
+        let sortOpt = this.$route.query.sortOptions;
+        return sortOpt ? sortOpt.split(',') : [];
+      },
+      set(value) {
+        this.setQueryParam('sortOptions', value);
+      },
+    },
     coach: {
       get() {
         return this.$route.query.coach;
