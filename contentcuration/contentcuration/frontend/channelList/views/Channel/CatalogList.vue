@@ -190,38 +190,35 @@
         return RouteNames.CATALOG_DETAILS;
       },
       channels() {
-        const sortOpt = String(this.$route.query.sortOptions).split(",");
+        const sortOpt = String(this.$route.query.sortOptions).split(',');
         var sortFields = [];
         var dir = [];
         if (this.$route.query.sortOptions != undefined) {
           for (let i = 0; i < sortOpt.length; i++) {
-            if (sortOpt[i] == "modified") {
-              sortFields.push('modified');
-              dir.push('asc');
-            }
-            if (sortOpt[i] == "-modified") {
+            if (sortOpt[i] == 'modified') {
               sortFields.push('modified');
               dir.push('desc');
             }
-            if (sortOpt[i] == "-name") {
+            if (sortOpt[i] == '-modified') {
+              sortFields.push('modified');
+              dir.push('asc');
+            }
+            if (sortOpt[i] == '-name') {
               sortFields.push(user => user.name.toLowerCase());
               dir.push('desc');
             }
           }
-          if (!sortOpt.includes("-name")) {
+          if (!sortOpt.includes('-name')) {
             sortFields.push(user => user.name.toLowerCase());
             dir.push('asc');
           }
           console.log(sortFields);
-        }
-        else {
+        } else {
           sortFields.push(user => user.name.toLowerCase());
           dir.push('asc');
         }
-        return orderBy(
-          this.getChannels(this.page.results),
-          sortFields, dir
-        )
+        console.log(orderBy(this.getChannels(this.page.results), sortFields, dir));
+        return orderBy(this.getChannels(this.page.results), sortFields, dir);
       },
       selectedCount() {
         return this.page.count - this.excluded.length;
