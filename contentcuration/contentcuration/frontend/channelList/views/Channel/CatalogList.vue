@@ -19,20 +19,30 @@
           <h1 class="mb-2 ml-1 title">
             {{ $tr('resultsText', { count: page.count }) }}
           </h1>
-          <ActionLink
-            v-if="page.count && !selecting"
-            :text="$tr('selectChannels')"
-            data-test="select"
-            @click="setSelection(true)"
-          />
-          <Checkbox
-            v-else-if="selecting"
-            v-model="selectAll"
-            class="mb-4 mx-2"
-            :label="$tr('selectAll')"
-            data-test="select-all"
-            :indeterminate="0 < selected.length && selected.length < channels.length"
-          />
+          <VLayout>
+            <ActionLink
+              v-if="page.count && !selecting"
+              :text="$tr('selectChannels')"
+              data-test="select"
+              @click="setSelection(true)"
+            />
+            <Checkbox
+              v-else-if="selecting"
+              v-model="selectAll"
+              class="mb-4 mx-2"
+              :label="$tr('selectAll')"
+              data-test="select-all"
+              :indeterminate="0 < selected.length && selected.length < channels.length"
+            />
+            <!-- Sorting -->
+            <VSpacer />
+            <MultiSelect
+              v-model="sortOptions"
+              :items="sortingOptions"
+              :label="$tr('sortLabel')"
+              @input="selectOpt"
+            />
+          </VLayout>
         </VFlex>
         <VFlex xs12>
           <VLayout v-for="item in channels" :key="item.id" align-center>
@@ -122,6 +132,8 @@
   import ToolBar from 'shared/views/ToolBar';
   import OfflineText from 'shared/views/OfflineText';
   import { constantsTranslationMixin } from 'shared/mixins';
+  import { catalogFilterMixin } from './mixins';
+  import MultiSelect from 'shared/views/form/MultiSelect';
   import { channelExportMixin } from 'shared/views/channel/mixins';
 
   export default {
@@ -135,8 +147,9 @@
       Checkbox,
       ToolBar,
       OfflineText,
+      MultiSelect,
     },
-    mixins: [channelExportMixin, constantsTranslationMixin],
+    mixins: [channelExportMixin, constantsTranslationMixin, catalogFilterMixin],
     data() {
       return {
         loading: true,
@@ -191,6 +204,26 @@
       },
       channels() {
         const sortOpt = String(this.$route.query.sortOptions).split(',');
+        /*const lang = String(this.$route.query.languages).split(',');
+        var language = "en";
+        if (lang.length == 1 && lang[0] != "undefined") {
+          language = String(lang[0]);
+        }
+        function customSort(channels, language) {
+          return channels.sort(function(a, b) {
+            var c1 = a.name.toLowerCase();
+            var c2 = b.name.toLowerCase();
+            if (sortOpt.includes('-name')) {
+              return c2.localeCompare(c1, language);
+            }
+            else {
+              return c1.localeCompare(c2, language);
+            }
+            return c1.localeCompare(c2, language);
+          });
+        }
+        return customSort(this.getChannels(this.page.results), language);
+        */
         var sortFields = [];
         var dir = [];
         if (this.$route.query.sortOptions != undefined) {
@@ -219,6 +252,30 @@
         }
         console.log(orderBy(this.getChannels(this.page.results), sortFields, dir));
         return orderBy(this.getChannels(this.page.results), sortFields, dir);
+      },
+      sortingOptions() {
+        var options = [
+          {
+            'text': 'Name Z to A',
+            'value': '-name',
+          },
+          {
+            'text': 'Modified (latest to oldest)',
+            'value': 'modified',
+          },
+          {
+            'text': 'Modified (oldest to latest)',
+            'value': '-modified',
+          },
+        ];
+        return (
+          options.map(o => {
+            return {
+              text: o.text,
+              value: o.value,
+            }
+          })
+        )
       },
       selectedCount() {
         return this.page.count - this.excluded.length;
@@ -284,6 +341,36 @@
         this.setSelection(false);
         return this.downloadChannelsPDF(params);
       },
+      selectOpt: function (e) {
+        if (e.includes('modified')) {
+          this.sortingOptions.forEach((item) => {
+            if (item.value == '-modified') {
+              item.disabled = true;
+            }
+          })
+        }
+        else if (!e.includes('modified')) {
+          this.sortingOptions.forEach((item) => {
+            if (item.value == '-modified') {
+              item.disabled = false;
+            }
+          })
+        }
+        if (e.includes('-modified')) {
+          this.sortingOptions.forEach((item) => {
+            if (item.value == 'modified') {
+              item.disabled = true;
+            }
+          })
+        }
+        else if (!e.includes('-modified')) {
+          this.sortingOptions.forEach((item) => {
+            if (item.value == 'modified') {
+              item.disabled = false;
+            }
+          })
+        }
+      },
     },
     $trs: {
       resultsText: '{count, plural,\n =1 {# result found}\n other {# results found}}',
@@ -296,6 +383,7 @@
       channelSelectionCount:
         '{count, plural,\n =1 {# channel selected}\n other {# channels selected}}',
       selectAll: 'Select all',
+      sortLabel: 'Sort by',
     },
   };
 

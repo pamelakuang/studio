@@ -79,6 +79,22 @@ export const catalogFilterMixin = {
         this.setQueryParam('bookmark', value);
       },
     },
+    published: {
+      get() {
+        return this.$route.query.published;
+      },
+      set(value) {
+        this.setQueryParam('published', value);
+      },
+    },
+    unpublished: {
+      get() {
+        return this.$route.query.unpublished;
+      },
+      set(value) {
+        this.setQueryParam('unpublished', value);
+      },
+    },
     collection: {
       get() {
         return this.$route.query.collection;

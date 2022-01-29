@@ -46,27 +46,28 @@
           :menu-props="menuProps"
         />
 
-        <!-- License (attach to self to keep in notranslate class) -->
-        <MultiSelect
-          v-if="!libraryMode"
-          v-model="licenses"
-          :items="licenseOptions"
-          :label="$tr('licenseLabel')"
-        />
-
-        <!-- Formats (attach to self to keep in notranslate class) -->
-        <MultiSelect
-          v-model="kinds"
-          :items="kindOptions"
-          :label="$tr('formatLabel')"
-        />
-
         <!-- Starred -->
         <Checkbox
           v-if="loggedIn"
           v-model="bookmark"
           color="primary"
           :label="$tr('starredLabel')"
+        />
+
+        <!-- Published -->
+        <Checkbox
+          v-if="loggedIn"
+          v-model="published"
+          color="primary"
+          :label="$tr('publishLabel')"
+        />
+
+        <!-- Unpublished -->
+        <Checkbox
+          v-if="loggedIn"
+          v-model="unpublished"
+          color="primary"
+          :label="$tr('unpublishLabel')"
         />
 
         <!-- Includes -->
@@ -126,7 +127,7 @@
   const excludedKinds = new Set([ContentKindsNames.TOPIC, ContentKindsNames.H5P]);
 
   export default {
-    name: 'CatalogFilters',
+    name: 'ChannelListFilters',
     components: {
       LanguageFilter,
       Checkbox,
@@ -155,26 +156,6 @@
       menuProps() {
         return { offsetY: true, maxHeight: 270 };
       },
-      kindOptions() {
-        return (window.publicKinds || [])
-          .map(kind => {
-            if (!excludedKinds.has(kind)) {
-              return {
-                value: kind,
-                text: this.translateConstant(kind),
-              };
-            }
-          })
-          .filter(Boolean);
-      },
-      licenseOptions() {
-        return (window.publicLicenses || []).map(id => {
-          return {
-            value: Number(id),
-            text: this.translateLicense(Number(id)),
-          };
-        });
-      },
       setKeywords() {
         return debounce(this.updateKeywords, 500);
       },
@@ -197,8 +178,8 @@
       coachLabel: 'Resources for coaches',
       subtitlesLabel: 'Captions or subtitles',
       starredLabel: 'Starred',
-      licenseLabel: 'Licenses',
-      formatLabel: 'Formats',
+      publishLabel: 'Published',
+      unpublishLabel: 'Unpublished',
       includesLabel: 'Display only channels with',
       searchText: 'Search',
       coachDescription: 'Resources for coaches are only visible to coaches in Kolibri',
